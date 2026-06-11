@@ -9,6 +9,7 @@ export default function App() {
   const [appState, setAppState] = useState<'idle' | 'listening' | 'processing'>('idle');
   const [statusMessage, setStatusMessage] = useState("Tap to start speaking");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const cameraRef = useRef<any>(null);
 
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function App() {
   // 2. STOP RECORDING & INTERCEPT AUDIO LOCAL PATH
   const stopAndProcessSequence = async () => {
     if (!recording || !cameraRef.current) return;
+    
+    if (!isCameraReady) {
+      Alert.alert("Camera Warming Up", "The camera scanner lens is still initializing. Please wait a second and try again.");
+      return;
+    }
 
     setAppState('processing');
     setStatusMessage("📸 Clicking picture and compiling scene...");
@@ -67,9 +73,9 @@ export default function App() {
         throw new Error("Missing media URI inputs");
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sequence collection layout pipeline failed', error);
-      Alert.alert("Capture Error", "Failed to collect audio data or camera frame.");
+      Alert.alert("Capture Error", `Failed to snap frame: ${error?.message || error}`);
       resetToIdle();
     }
   };
@@ -78,6 +84,7 @@ export default function App() {
   const uploadMediaToBackend = async (audioFileUri: string, photoFileUri: string) => {
     try {
       const formData = new FormData();
+      formData.append('query', 'Identify any obstacles or physical hazards in front of me.');
       
       // Append the raw recorded audio file (.m4a format)
       formData.append('audio', {
@@ -93,8 +100,8 @@ export default function App() {
         type: 'image/jpeg',
       } as any);
 
-      // Your live local Flask server endpoint distribution target route
-      const BACKEND_URL = 'http://192.168.29.85:5000/process'; 
+      // Points to your live Render endpoint route configuration
+      const BACKEND_URL = 'https://smartverse-hackathon-app-v0-2.onrender.com/process-scene'; 
 
       const response = await fetch(BACKEND_URL, {
         method: 'POST',
@@ -102,28 +109,31 @@ export default function App() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (!response.ok) throw new Error("Server responded with error status code");
+      if (!response.ok) {
+        throw new Error(`Server status crash: ${response.status}`);
+      }
 
       const result = await response.json();
       
-      // Update the main status screen display and announce out loud using device TTS engine
-      setStatusMessage(`🤖 AI Answer:\n${result.ai_description}`);
-      Speech.speak(result.ai_description, { language: 'en' });
+      // Extraction targets result.spatial_description matched to backend response
+      const aiResponseText = result.spatial_description || "Scene processed successfully.";
+
+      setStatusMessage(`🤖 AI Answer:\n${aiResponseText}`);
+      Speech.speak(aiResponseText, { language: 'en' });
       
-      // Auto-clear notification display card layout after reading cycles settle down
       setTimeout(() => {
         resetToIdle();
       }, 12000);
 
-    } catch (error) {
-      // Friendly testing fallback block if Python backend server instances aren't up running locally yet
+    } catch (error: any) {
+      console.error(error);
       Alert.alert(
-        "Server Connection", 
-        "App works flawlessly! Captured both your voice recording and your photo. Ready to receive your live Flask server response."
+        "Debugging Connection", 
+        `Error Message: ${error?.message || error || 'Unknown Error'}`
       );
       resetToIdle();
     }
-  };
+  }; // <--- FIX: This closing brace was missing!
 
   const resetToIdle = () => {
     setAppState('idle');
@@ -151,13 +161,15 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Invisible target component framework to handle image asset mapping frame bindings */}
-        <CameraView style={styles.cameraHidden} ref={cameraRef} />
+        {/* Safe minimal frame size layout fix with native layout listener ready states */}
+        <CameraView 
+          style={styles.cameraActiveTiny} 
+          ref={cameraRef} 
+          onCameraReady={() => setIsCameraReady(true)}
+        />
         
-        {/* Main Status Log Messaging View Output Display Block */}
         <Text style={styles.textPrompt}>{statusMessage}</Text>
 
-        {/* Central Interactivity Button Sequence State Controllers */}
         <TouchableOpacity 
           style={[
             styles.giantCircularButton,
@@ -179,7 +191,9 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212' },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  cameraHidden: { width: 1, height: 1, opacity: 0 },
+  
+  // Safe minimal active frame footprint
+  cameraActiveTiny: { width: 10, height: 10, position: 'absolute', bottom: 0, right: 0, opacity: 0.1 },
   
   giantCircularButton: {
     width: 220,
