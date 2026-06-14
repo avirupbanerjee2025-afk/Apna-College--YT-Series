@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Pressable } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
@@ -11,6 +11,7 @@ export default function App() {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const cameraRef = useRef<any>(null);
+  const holdTimer = useRef<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -119,7 +120,7 @@ export default function App() {
       const aiResponseText = result.spatial_description || "Scene processed successfully.";
 
       setStatusMessage(`🤖 AI Answer:\n${aiResponseText}`);
-     Speech.speak(aiResponseText, {
+      Speech.speak(aiResponseText, {
   language: 'en',
   onDone: () => {
     resetToIdle();
@@ -136,6 +137,21 @@ export default function App() {
     }
   }; // <--- FIX: This closing brace was missing!
 
+  const startHoldTimer = () => {
+  if (appState !== 'processing') return;
+
+  holdTimer.current = setTimeout(() => {
+    Speech.stop();
+    resetToIdle();
+  }, 2000);
+};
+
+const cancelHoldTimer = () => {
+  if (holdTimer.current) {
+    clearTimeout(holdTimer.current);
+    holdTimer.current = null;
+  }
+};
   const resetToIdle = () => {
     setAppState('idle');
     setStatusMessage("Tap to start speaking");
@@ -160,6 +176,11 @@ export default function App() {
   }
 
   return (
+  <Pressable
+    style={{ flex: 1 }}
+    onPressIn={startHoldTimer}
+    onPressOut={cancelHoldTimer}
+  >
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Safe minimal frame size layout fix with native layout listener ready states */}
@@ -186,6 +207,7 @@ export default function App() {
         </TouchableOpacity>
       </ScrollView>
     </View>
+    </Pressable>
   );
 }
 
@@ -225,4 +247,5 @@ const styles = StyleSheet.create({
     minHeight: 120,
     paddingHorizontal: 10
   }
+});
 });
