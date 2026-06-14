@@ -119,11 +119,12 @@ export default function App() {
       const aiResponseText = result.spatial_description || "Scene processed successfully.";
 
       setStatusMessage(`🤖 AI Answer:\n${aiResponseText}`);
-      Speech.speak(aiResponseText, { language: 'en' });
-      
-      setTimeout(() => {
-        resetToIdle();
-      }, 12000);
+     Speech.speak(aiResponseText, {
+  language: 'en',
+  onDone: () => {
+    resetToIdle();
+  }
+});
 
     } catch (error: any) {
       console.error(error);
