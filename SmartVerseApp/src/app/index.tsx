@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Pressable } from 'react-native';
+// 🟢 FIX 1: Added Platform to imports
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, Pressable, Platform } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
@@ -86,16 +87,20 @@ export default function App() {
     try {
       const formData = new FormData();
       
-      // Append the raw recorded audio file (.m4a format)
+      // Android File URI Normalization Fix
+      const cleanAudioUri = Platform.OS === 'android' ? audioFileUri : audioFileUri.replace('file://', '');
+      const cleanPhotoUri = Platform.OS === 'android' ? photoFileUri : photoFileUri.replace('file://', '');
+
+      // Append the raw recorded audio file
       formData.append('audio', {
-        uri: audioFileUri,
+        uri: cleanAudioUri,
         name: 'voice_command.m4a',
         type: 'audio/m4a',
       } as any);
 
       // Append the snapped camera image asset
       formData.append('image', {
-        uri: photoFileUri,
+        uri: cleanPhotoUri,
         name: 'scene_photo.jpg',
         type: 'image/jpeg',
       } as any);
@@ -103,7 +108,6 @@ export default function App() {
       // Points to your live Render endpoint route configuration
       const BACKEND_URL = 'https://smartverse-hackathon-app-v0-2.onrender.com/process-scene'; 
 
-      // 🟢 FIX: Stripped headers object entirely. Let fetch auto-generate the content-type with boundaries.
       const response = await fetch(BACKEND_URL, {
         method: 'POST',
         body: formData,
@@ -115,7 +119,6 @@ export default function App() {
 
       const result = await response.json();
       
-      // Extraction targets result.spatial_description matched to backend response
       const aiResponseText = result.spatial_description || "Scene processed successfully.";
 
       setStatusMessage(`🤖 AI Answer:\n${aiResponseText}`);
@@ -134,7 +137,7 @@ export default function App() {
       );
       resetToIdle();
     }
-  }; 
+  }; // 🟢 FIX 2: Properly closed function block
 
   const startHoldTimer = () => {
     if (appState !== 'processing') return;
@@ -178,7 +181,6 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Safe minimal frame size layout fix with native layout listener ready states */}
         <CameraView 
           style={styles.cameraActiveTiny} 
           ref={cameraRef} 
@@ -219,9 +221,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212' },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  
   cameraActiveTiny: { width: 10, height: 10, position: 'absolute', bottom: 0, right: 0, opacity: 0.1 },
-  
   giantCircularButton: {
     width: 220,
     height: 220,
@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
   buttonListening: { backgroundColor: '#ff4757', borderColor: '#ff6b81', shadowColor: '#ff4757' },
   buttonProcessing: { backgroundColor: '#2ed573', borderColor: '#7bed9f', shadowColor: '#2ed573' },
   micIcon: { fontSize: 72, color: '#ffffff' },
-  
   textPrompt: { 
     color: '#ffffff', 
     fontSize: 24, 
