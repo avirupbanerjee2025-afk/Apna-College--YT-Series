@@ -176,11 +176,7 @@ const cancelHoldTimer = () => {
   }
 
   return (
-  <Pressable
-    style={{ flex: 1 }}
-    onPressIn={startHoldTimer}
-    onPressOut={cancelHoldTimer}
-  >
+
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Safe minimal frame size layout fix with native layout listener ready states */}
@@ -190,7 +186,19 @@ const cancelHoldTimer = () => {
           onCameraReady={() => setIsCameraReady(true)}
         />
         
-        <Text style={styles.textPrompt}>{statusMessage}</Text>
+        <Pressable
+  onLongPress={() => {
+    if (appState === 'processing') {
+      Speech.stop();
+      resetToIdle();
+    }
+  }}
+  delayLongPress={2000}
+>
+  <Text style={styles.textPrompt}>
+    {statusMessage}
+  </Text>
+</Pressable>
 
         <TouchableOpacity 
           style={[
@@ -199,7 +207,7 @@ const cancelHoldTimer = () => {
             appState === 'processing' && styles.buttonProcessing
           ]} 
           onPress={handleActionSequence}
-          disabled={appState === 'processing'}
+          
         >
           <Text style={styles.micIcon}>
             {appState === 'idle' ? '🎙️' : appState === 'listening' ? '📸' : '⏳'}
@@ -207,8 +215,7 @@ const cancelHoldTimer = () => {
         </TouchableOpacity>
       </ScrollView>
     </View>
-    </Pressable>
-  );
+      );
 }
 
 const styles = StyleSheet.create({
@@ -247,5 +254,4 @@ const styles = StyleSheet.create({
     minHeight: 120,
     paddingHorizontal: 10
   }
-});
 });
