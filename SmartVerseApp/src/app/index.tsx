@@ -103,10 +103,10 @@ export default function App() {
       // Points to your live Render endpoint route configuration
       const BACKEND_URL = 'https://smartverse-hackathon-app-v0-2.onrender.com/process-scene'; 
 
+      // 🟢 FIX: Stripped headers object entirely. Let fetch auto-generate the content-type with boundaries.
       const response = await fetch(BACKEND_URL, {
         method: 'POST',
         body: formData,
-        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       if (!response.ok) {
@@ -120,11 +120,11 @@ export default function App() {
 
       setStatusMessage(`🤖 AI Answer:\n${aiResponseText}`);
       Speech.speak(aiResponseText, {
-  language: 'en',
-  onDone: () => {
-    resetToIdle();
-  }
-});
+        language: 'en',
+        onDone: () => {
+          resetToIdle();
+        }
+      });
 
     } catch (error: any) {
       console.error(error);
@@ -134,23 +134,24 @@ export default function App() {
       );
       resetToIdle();
     }
-  }; // <--- FIX: This closing brace was missing!
+  }; 
 
   const startHoldTimer = () => {
-  if (appState !== 'processing') return;
+    if (appState !== 'processing') return;
 
-  holdTimer.current = setTimeout(() => {
-    Speech.stop();
-    resetToIdle();
-  }, 2000);
-};
+    holdTimer.current = setTimeout(() => {
+      Speech.stop();
+      resetToIdle();
+    }, 2000);
+  };
 
-const cancelHoldTimer = () => {
-  if (holdTimer.current) {
-    clearTimeout(holdTimer.current);
-    holdTimer.current = null;
-  }
-};
+  const cancelHoldTimer = () => {
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  };
+
   const resetToIdle = () => {
     setAppState('idle');
     setStatusMessage("Tap to start speaking");
@@ -175,7 +176,6 @@ const cancelHoldTimer = () => {
   }
 
   return (
-
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Safe minimal frame size layout fix with native layout listener ready states */}
@@ -186,18 +186,18 @@ const cancelHoldTimer = () => {
         />
         
         <Pressable
-  onLongPress={() => {
-    if (appState === 'processing') {
-      Speech.stop();
-      resetToIdle();
-    }
-  }}
-  delayLongPress={2000}
->
-  <Text style={styles.textPrompt}>
-    {statusMessage}
-  </Text>
-</Pressable>
+          onLongPress={() => {
+            if (appState === 'processing') {
+              Speech.stop();
+              resetToIdle();
+            }
+          }}
+          delayLongPress={2000}
+        >
+          <Text style={styles.textPrompt}>
+            {statusMessage}
+          </Text>
+        </Pressable>
 
         <TouchableOpacity 
           style={[
@@ -206,7 +206,6 @@ const cancelHoldTimer = () => {
             appState === 'processing' && styles.buttonProcessing
           ]} 
           onPress={handleActionSequence}
-          
         >
           <Text style={styles.micIcon}>
             {appState === 'idle' ? '🎙️' : appState === 'listening' ? '📸' : '⏳'}
@@ -214,14 +213,13 @@ const cancelHoldTimer = () => {
         </TouchableOpacity>
       </ScrollView>
     </View>
-      );
+  );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#121212' },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   
-  // Safe minimal active frame footprint
   cameraActiveTiny: { width: 10, height: 10, position: 'absolute', bottom: 0, right: 0, opacity: 0.1 },
   
   giantCircularButton: {
