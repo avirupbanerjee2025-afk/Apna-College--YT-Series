@@ -85,7 +85,6 @@ export default function App() {
   const uploadMediaToBackend = async (audioFileUri: string, photoFileUri: string) => {
     try {
       const formData = new FormData();
-      formData.append('query', 'Identify any obstacles or physical hazards in front of me.');
       
       // Append the raw recorded audio file (.m4a format)
       formData.append('audio', {
