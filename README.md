@@ -33,11 +33,7 @@ cd Apna-College--YT-Series
 npm install
 ```
 
-### 3. Connect to the Backend
-Ensure you have the Backend Core Server running locally or deployed. Update your local configuration endpoint to point to your Flask server's IP address.
-
-
-### 4. Fire Up the Mobile Client
+### 3. Fire Up the Mobile Client
 ```bash
 npx expo start
 ```
