@@ -53,7 +53,6 @@ Voice Vision Assist is an accessibility-focused mobile client and backend ecosys
 Accessibility / Healthcare / Open Innovation
 
 ### 4. Objectives
-* **Hands-Free Operation:** Eliminate complex screen navigation by driving the user experience entirely via voice-to-text queries.
 * **Low-Latency Spatial Auditing:** Deliver real-time, safety-first environment mapping to identify obstacles, table boundaries, or loose wires.
 * **Intelligent Hazard Flagging:** Go beyond simple object labeling by explaining where an object is in 3D space relative to the user.
 
