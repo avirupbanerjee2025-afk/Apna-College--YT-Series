@@ -25,3 +25,26 @@ Make sure you have [Node.js](https://nodejs.org/) and Git installed on your syst
 ```bash
 git clone [https://github.com/avirupbanerjee2025-afk/Apna-College--YT-Series.git](https://github.com/avirupbanerjee2025-afk/Apna-College--YT-Series.git)
 cd Apna-College--YT-Series
+
+---
+
+## 📄 Full Project Specifications & Documentation
+
+### 1. Project Title
+Voice Vision Assist — Voice-Activated Spatial Guide for the Visually Impaired
+
+### 2. Abstract
+Voice Vision Assist is an accessibility-focused mobile client and backend ecosystem engineered to grant greater environmental independence to visually impaired individuals. By streaming voice prompts and real-time camera frames from a React Native mobile application to a Python Flask gateway, the system leverages multimodal AI to map physical rooms, identify immediate navigational hazards, and stream clear, spoken spatial reasoning instructions back to the user completely hands-free.
+
+### 3. Selected Track
+Accessibility / Healthcare / Open Innovation *(Note: Ask your team leader which one of these tracks they officially picked when registering!)*
+
+### 4. Objectives
+* **Hands-Free Operation:** Eliminate complex screen navigation by driving the user experience entirely via voice-to-text queries.
+* **Low-Latency Spatial Auditing:** Deliver real-time, safety-first environment mapping to identify obstacles, table boundaries, or loose wires.
+* **Intelligent Hazard Flagging:** Go beyond simple object labeling by explaining *where* an object is in 3D space relative to the user.
+
+### 5. Proposed Solution
+The application splits heavy computational workloads away from the edge device:
+* **The Client (Frontend):** Built with React Native (Expo) to ensure native device camera and audio recording capabilities while preserving battery life.
+* **The Server (Backend Core):** Built with Python Flask to handle raw multi-part payloads, manage environment security keys, and directly interface with Google's GenAI SDK (Gemini 1.5) to return safety instructions.
